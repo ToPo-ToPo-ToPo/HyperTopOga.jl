@@ -7,12 +7,31 @@ This library is based on the following paper:
 
 Please cite this paper when using this library in your research.
 
+## Installation
+1. Set up a virtual environment.
+    ```
+    (@v1.10) pkg> activate .
+    ```
+2. Install the dependent packages.
+    ```
+    (HyperTopOga) pkg> instantiate
+    ```
+
 ## Usage
+1. Set up a virtual environment.
+    ```
+    (@v1.10) pkg> activate .
+    ```
+2. Run the program from the command. hoge.jl is the main program you want to run. Change it as needed. A is the number of multi-threaded parallelism.
+    ```
+    julia -t A --project=. hoge.jl
+    ```
 
 ## Citation
 ### Paper Reference
-### BibTeX
+[DOI:10.2139/ssrn.5292866](http://dx.doi.org/10.2139/ssrn.5292866)
+
 
 ## License
 This project is licensed under the MIT License.  
-See the [LICENSE](./LICENSE) file for details.
+See the [LICENSE](./LICENSE.txt) file for details.
