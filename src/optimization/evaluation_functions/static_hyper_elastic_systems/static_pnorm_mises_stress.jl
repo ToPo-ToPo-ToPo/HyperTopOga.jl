@@ -198,3 +198,67 @@ function compute_mises_stress_pnorm(
     #
     return value^(1.0 / p)
 end
+#----------------------------------------------------------------------------
+# 評価関数
+#----------------------------------------------------------------------------
+function compute_mises_stress_pnorm(
+    U::Vector{Float64},
+    x_tilde::Vector{Float64},
+    num_svalue_types::Int64, 
+    physics::SolidMechanics, 
+    element_states::Vector{ElementState}, 
+    sigma_limit::AbstractInterpolation,
+    p::Float64
+    )::Float64
+    return compute_mises_stress_pnorm(
+        x_tilde, 
+        num_svalue_types, 
+        physics, 
+        element_states,
+        sigma_limit, 
+        p, 
+        U
+    )
+end
+#----------------------------------------------------------------------------
+#
+#----------------------------------------------------------------------------
+function compute_lagrangian_mises_stress_pnorm(
+    x_tilde::Vector{Float64}, 
+    physics::SolidMechanics, 
+    sigma_limit::AbstractInterpolation, 
+    p::Float64, 
+    num_step::Int64, 
+    num_svalue_types::Int64, 
+    U::Vector{Float64}, 
+    lambda::Vector{Float64},
+    opt_filter::AbstractOptFilter, 
+    design_space_type::ElementBase
+    )::Float64
+
+    # 材料物性のデータ作成
+    element_states = make_element_states(
+        x_tilde, 
+        physics.elements, 
+        num_svalue_types, 
+        design_space_type, 
+        opt_filter
+    )
+
+    # 表面力ベクトルによる外力ベクトルを作成
+    Ft = make_Ft(physics.condition.neumann, physics, num_step)
+    
+    #
+    Fext = Ft
+    R = make_Fint(physics, element_states, U) .- Fext
+
+    # 関数の計算
+    f = compute_mises_stress_pnorm(
+        x_tilde, num_svalue_types, physics, element_states, sigma_limit, p, U
+    )
+    lamR = dot(lambda, R)
+
+    #
+    return f + lamR
+    
+end

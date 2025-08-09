@@ -17,7 +17,7 @@ function main()
 
     # 材料モデルの定義 固体領域
     interpolate = HyperTopOga.DMOSIMP([0.0, 1.0, 2.0], 1.0)
-    young = HyperTopOga.DMOSIMP([1.0e-03, 5.0, 10.0], 3.0)
+    young = HyperTopOga.DMOSIMP([1.0e-03, 5.0, 7.0], 3.0)
     poisson = HyperTopOga.Constant(0.3)
     density = HyperTopOga.Constant(1.0e-05)
     gamma_x = HyperTopOga.Constant(1.0)
@@ -118,8 +118,7 @@ function main()
     )
 
     # 微係数を求めたい値
-    Random.seed!(10) # 同じシード値で設計変数を生成したい場合は必要
-    x = rand(length(elements) * num_svalue_types)
+    x = fill(0.5, length(elements) * num_svalue_types)
 
     # 評価関数の定義
     eval = HyperTopOga.StaticEndComplianceHyperElastic(

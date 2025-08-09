@@ -9,8 +9,8 @@ function main()
     # 解析モデルの設定
     length_x = 200.0
     length_y = 100.0
-    division_x = 60
-    division_y = 30
+    division_x = 100
+    division_y = 50
     thickness = 1.0
 
     # 材料モデルの定義
@@ -96,7 +96,7 @@ function main()
     range_max = [200.0, 100.0, 0.0]
     # 荷重条件を指定
     traction_x(x) = 0.0
-    traction_y(x) = -1.5e-01 * (x / Float64(num_step))
+    traction_y(x) = -0.04e-00 * (x / Float64(num_step))
     neumann_values = [traction_x, traction_y]
     HyperTopOga.add_condition(
         bc, 

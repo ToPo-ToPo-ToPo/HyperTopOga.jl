@@ -5,7 +5,6 @@ using HyperTopOga
 #
 #-------------------------------------------------------------------------------------------------------
 function main()
-
     #--------------------------------------------------------------------------------------------
     # 解析モデルの設定
     length_x = 200.0
@@ -15,7 +14,7 @@ function main()
     thickness = 1.0
 
     # 材料モデルの定義
-    interpolate = HyperTopOga.DMOSIMP([0.0, 1.0, 2.0], 1.0)
+    interpolate = HyperTopOga.DMOLinear([0.0, 1.0, 2.0])
     young = HyperTopOga.DMOSIMP([0.0, 5.0, 7.0], 3.0)
     poisson = HyperTopOga.Constant(0.3)
     density = HyperTopOga.Constant(1.0e-05)
@@ -29,23 +28,24 @@ function main()
     problem_type = HyperTopOga.TotalLagrange()
     method = HyperTopOga.NewtonRapson()
     output_flag = true
-    output_file_name = "output/MMTO_min_mises_2pk_stress"
+    output_file_name = "output/MMTO_hyper_elastic_comp"
 
     #--------------------------------------------------------------------------------------------
     # 最適化の設定
     num_svalue_types = 2
     xmin = 1.0e-03
-    max_eval = 300
+    max_eval = 100
     optimizer = HyperTopOga.MyGCMMA(0.25, 1.08, 0.65, 0.25, 0.2)
-    
-    # 目的関数の設定
-    df_method = HyperTopOga.AutomaticAdjointDiff()
+
+    # For objective function
+    weight = 0.5
     p = 16.0
-    
-    # 体積制約の設定
+    df_method = HyperTopOga.AutomaticAdjointDiff()
+
+    # For constraint
     V_limit = 0.2
-    
-    # フィルターの設定
+
+    # For opt filter
     radius = 3.0
     opt_filter = HyperTopOga.HeavisideProjectionFilter()
     
@@ -97,6 +97,7 @@ function main()
     # ノイマン境界を設定
     range_min = [190.0, 100.0, 0.0]
     range_max = [200.0, 100.0, 0.0]
+    # 荷重条件を指定
     traction_x(x) = 0.0
     traction_y(x) = -0.04e-00 * (x / Float64(num_step))
     neumann_values = [traction_x, traction_y]
@@ -111,7 +112,7 @@ function main()
             neumann_values
         )
     )
-
+    
     # モデルの作成
     physics = HyperTopOga.StaticSolidMechanics(
         nodes, 
@@ -170,18 +171,22 @@ function main()
     HyperTopOga.set_option!(optimizer, max_eval)
 
     # 目的関数の定義と設定
-    objective = HyperTopOga.StaticMisesStressPnormHyperElastic(
+    objective1 = HyperTopOga.StaticEndComplianceHyperElastic(x0, physics, num_step, method)
+    HyperTopOga.set_objective_function!(optimizer.model, "min", objective1, weight, df_method)
+
+    # 目的関数の定義と設定
+    objective2 = HyperTopOga.StaticMisesStressPnormHyperElastic(
         x0, physics, sigma_limit, p, num_step, method
     )
-    HyperTopOga.set_objective_function!(optimizer.model, "min", objective, 1.0, df_method)
+    HyperTopOga.set_objective_function!(optimizer.model, "min", objective2, 1.0-weight, df_method)
 
     # 体積制約関数を定義
     constraint = HyperTopOga.Volume(x0, 1)
-    HyperTopOga.add_inequality_constraint!(optimizer.model, constraint, V_limit, df_method)
+    HyperTopOga.add_inequality_constraint!(optimizer.model, constraint, V_limit, HyperTopOga.AutomaticAdjointDiff())
 
     # 体積制約関数を定義
     constraint = HyperTopOga.Volume(x0, 2)
-    HyperTopOga.add_inequality_constraint!(optimizer.model, constraint, V_limit, df_method)
+    HyperTopOga.add_inequality_constraint!(optimizer.model, constraint, V_limit, HyperTopOga.AutomaticAdjointDiff())
 
     #--------------------------------------------------------------------------------------------
     # Running Optimization
@@ -191,15 +196,9 @@ function main()
     HyperTopOga.output_opt_result(minx, physics, opt_settings, opt_filter)
 
     # 評価関数の履歴を出力
-    HyperTopOga.output(
-        history, 
-        physics.output_file_name, 
-        length(optimizer.model.objective), 
-        length(optimizer.model.constraint)
-    )
-
+    HyperTopOga.output(history, physics.output_file_name, length(optimizer.model.objective), length(optimizer.model.constraint))
 end
 #----------------------------------------------------------------------------
 #
 #----------------------------------------------------------------------------
-main()
+@time main()

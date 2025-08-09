@@ -16,24 +16,12 @@ function main()
     thickness = 1.0
 
     # 材料モデルの定義 固体領域
-    young1 = 5.0
-    poisson1 = 0.3
-    # lame定数
-    K1 = (poisson1 * young1) / ((1.0+poisson1) * (1.0-2.0*poisson1))
-    mu1 = 0.5 * young1 / (1.0 + poisson1)
-    #
-    young2 = 10.0
-    poisson2 = 0.3
-    # lame定数
-    K2 = (poisson2 * young1) / ((1.0+poisson2) * (1.0-2.0*poisson2))
-    mu2 = 0.5 * young2 / (1.0 + poisson2)
-    #
-    C1 = HyperTopOga.DMOSIMP([1.0e-03, 0.5*mu1, 0.5*mu2], 3.0)
-    C2 = HyperTopOga.DMOSIMP([1.0e-03, 0.2*mu1, 0.2*mu2], 3.0)
-    K = HyperTopOga.DMOSIMP([1.0e-03, 2.0*K1, 2.0*K2], 3.0)
+    C1 = HyperTopOga.DMOSIMP([1.0e-03, 1.0, 2.0], 3.0)
+    C2 = HyperTopOga.DMOSIMP([1.0e-03, 0.4, 1.0], 3.0)
+    K = HyperTopOga.DMOSIMP([1.0e-03, 1.5, 3.5], 3.0)
     density = HyperTopOga.Constant(1.0e-05)
     gamma_x = HyperTopOga.Constant(1.0)
-    sigma_limit = HyperTopOga.DMOSIMP([1.0e-03, 2.0, 10.0], 2.5)
+    sigma_limit = HyperTopOga.DMOSIMP([1.0e-03, 10.0, 20.0], 2.5)
     material_data = HyperTopOga.MooneyRivlinPlaneStrainData(
         C1, C2, HyperTopOga.Constant(0.0), HyperTopOga.Constant(0.0), K, density, gamma_x
     )
@@ -123,9 +111,7 @@ function main()
     HyperTopOga.filter_setup!(opt_filter, num_svalue_types, length(elements), physics, radius)
 
     # 微係数を求めたい値
-    Random.seed!(10) # 同じシード値で設計変数を生成したい場合は必要
-    x = rand(length(elements)*num_svalue_types)
-    #x = fill(0.4, length(elements))
+    x = fill(0.5, length(elements) * num_svalue_types)
 
     # 評価関数の定義を更新
     eval = HyperTopOga.StaticMisesStressPnormHyperElastic(x, physics, sigma_limit, p, num_step)

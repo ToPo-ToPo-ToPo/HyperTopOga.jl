@@ -13,4 +13,3 @@ include("nonlinear_fem.jl")
 #
 include("static_end_compliance.jl")
 include("static_pnorm_mises_stress.jl")
-include("static_pnorm_mises_cauchy_stress.jl")

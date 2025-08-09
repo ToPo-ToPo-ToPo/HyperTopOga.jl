@@ -16,13 +16,12 @@ function main()
     thickness = 1.0
 
     # 材料モデルの定義 固体領域
-    interpolate = HyperTopOga.DMOLinear([0.0, 1.0, 2.0])
-    young = HyperTopOga.DMOSIMP([1.0e-03, 5.0, 10.0], 3.0)
+    interpolate = HyperTopOga.DMOSIMP([0.0, 1.0, 2.0], 1.0)
+    young = HyperTopOga.DMOSIMP([1.0e-03, 5.0, 7.0], 3.0)
     poisson = HyperTopOga.Constant(0.3)
     density = HyperTopOga.Constant(1.0e-05)
     gamma_x = HyperTopOga.Constant(1.0)
-    #gamma_x = HyperTopOga.MMDMOHeavisideProjectionBinarization(1.0, 100.0, 0.1)
-    sigma_limit = HyperTopOga.DMOSIMP([1.0e-03, 2.0, 10.0], 2.5)
+    sigma_limit = HyperTopOga.DMOSIMP([1.0e-03, 10.0, 20.0], 2.5)
     material_data = HyperTopOga.NeoHookeanPlaneStrainData(young, poisson, density, gamma_x)
 
     # 検証内容
@@ -32,7 +31,6 @@ function main()
     output_flag = true
     #
     problem_type = HyperTopOga.TotalLagrange()
-    #problem_type = HyperTopOga.StabilisedTotalLagrange()
 
     #--------------------------------------------------------------------------------------------
     # 最適化の設定
@@ -109,9 +107,7 @@ function main()
     HyperTopOga.filter_setup!(opt_filter, num_svalue_types, length(elements), physics, radius)
 
     # 微係数を求めたい値
-    Random.seed!(10) # 同じシード値で設計変数を生成したい場合は必要
-    x = rand(length(elements)*num_svalue_types)
-    #x = fill(0.4, length(elements))
+    x = fill(0.5, length(elements) * num_svalue_types)
 
     # 評価関数の定義を更新
     eval = HyperTopOga.StaticMisesStressPnormHyperElastic(x, physics, sigma_limit, p, num_step)
