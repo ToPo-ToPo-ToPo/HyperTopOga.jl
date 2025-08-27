@@ -5,7 +5,7 @@ This library is based on the following paper:
 
 **Sensitivity analysis of any hyperelastic evaluation functions coupled with adjoint method and automatic differentiation, 2025**. [DOI:10.2139/ssrn.5292866](http://dx.doi.org/10.2139/ssrn.5292866)
 
-Please cite this paper when using this library in your research.
+When using this library, I would appreciate it if you could cite this paper.
 
 ## Installation
 1. Set up a virtual environment.
