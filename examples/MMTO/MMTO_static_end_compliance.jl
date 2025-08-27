@@ -14,7 +14,7 @@ function main()
     thickness = 1.0
 
     # 材料モデルの定義
-    interpolate = HyperTopOga.DMOLinear([0.0, 1.0, 2.0])
+    interpolate = HyperTopOga.DMOSIMP([0.0, 1.0, 2.0], 1.0)
     young = HyperTopOga.DMOSIMP([0.0, 5.0, 7.0], 3.0)
     poisson = HyperTopOga.Constant(0.3)
     density = HyperTopOga.Constant(1.0e-05)
@@ -33,7 +33,7 @@ function main()
     # 最適化の設定
     num_svalue_types = 2
     xmin = 1.0e-03
-    max_eval = 100
+    max_eval = 300
     optimizer = HyperTopOga.MyGCMMA(0.25, 1.08, 0.65, 0.25, 0.2)
 
     # For objective function
